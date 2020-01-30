@@ -26,8 +26,6 @@
 
 #pragma once
 
-#ifdef __serenity__
-
 #include <AK/Assertions.h>
 #include <AK/Types.h>
 #include <AK/Atomic.h>
@@ -48,6 +46,8 @@ private:
     u32 m_level { 0 };
     int m_holder { -1 };
 };
+
+#ifdef __serenity__
 
 class Locker {
 public:
@@ -104,6 +104,12 @@ inline void Lock::unlock()
 
 #define LOCKER(lock) LibThread::Locker locker(lock)
 
+#else
+
+#define LOCKER(x)
+
+#endif
+
 template<typename T>
 class Lockable {
 public:
@@ -127,19 +133,3 @@ private:
 };
 
 }
-
-#else
-
-namespace LibThread {
-
-class Lock {
-public:
-    Lock() { }
-    ~Lock() { }
-};
-
-}
-
-#define LOCKER(x)
-
-#endif
