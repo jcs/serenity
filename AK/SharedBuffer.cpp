@@ -28,7 +28,9 @@
 
 #include <AK/SharedBuffer.h>
 #include <AK/kmalloc.h>
+#ifdef __serenity__
 #include <Kernel/Syscall.h>
+#endif
 #include <stdio.h>
 #include <serenity.h>
 
@@ -104,18 +106,24 @@ void SharedBuffer::seal()
 
 void SharedBuffer::set_volatile()
 {
+#ifdef __serenity__
     u32 rc = syscall(SC_shbuf_set_volatile, m_shbuf_id, true);
     ASSERT(rc == 0);
+#endif
 }
 
 bool SharedBuffer::set_nonvolatile()
 {
+#ifdef __serenity__
     u32 rc = syscall(SC_shbuf_set_volatile, m_shbuf_id, false);
     if (rc == 0)
         return true;
     if (rc == 1)
         return false;
     ASSERT_NOT_REACHED();
+#else
+    return true;
+#endif
 }
 
 }
