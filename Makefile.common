@@ -127,12 +127,12 @@ $(STATIC_LIB_DEPS):
 IPCCOMPILER = $(SERENITY_BASE_DIR)/DevTools/IPCCompiler/IPCCompiler
 IPCCOMPILER: $(IPCCOMPILER)
 $(IPCCOMPILER):
-	@flock $(dir $(@)) $(MAKE) -C $(dir $(@))
+	$(QUIET) flock $(dir $(@)) $(MAKE) -C $(dir $(@))
 
 FORMCOMPILER = $(SERENITY_BASE_DIR)/DevTools/FormCompiler/FormCompiler
 FORMCOMPILER: $(FORMCOMPILER)
 $(FORMCOMPILER):
-	@flock $(dir $(@)) $(MAKE) -C $(dir $(@))
+	$(QUIET) flock $(dir $(@)) $(MAKE) -C $(dir $(@))
 
 .DEFAULT_GOAL := all
 
