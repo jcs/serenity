@@ -22,6 +22,10 @@ INCLUDE_FLAGS += \
 
 VERBOSE = 0
 
+ifeq ($(HOSTED),1)
+    USE_HOST_CXX=
+endif
+
 ifneq ($(USE_HOST_CXX),)
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),OpenBSD)
@@ -42,21 +46,38 @@ ifneq ($(USE_HOST_CXX),)
     OBJ_SUFFIX ?= .host
     ARCH = $(shell arch -s)
 else
-    TOOLCHAIN_PATH = $(SERENITY_BASE_DIR)/Toolchain/Local/bin
-    CXX = $(PRE_CXX) $(TOOLCHAIN_PATH)/i686-pc-serenity-g++
-    CC = $(PRE_CC) $(TOOLCHAIN_PATH)/i686-pc-serenity-gcc
-    AS = $(TOOLCHAIN_PATH)/i686-pc-serenity-as
-    LINK = $(TOOLCHAIN_PATH)/i686-pc-serenity-ld
-    RANLIB = $(TOOLCHAIN_PATH)/i686-pc-serenity-ranlib
-    AR = $(TOOLCHAIN_PATH)/i686-pc-serenity-ar
-    ARCH = i386
+    ifeq ($(HOSTED),1)
+        CXX = c++
+        CC = cc
+        AS = gas
+        LINK = ld
+        RANLIB = ranlib
+        AR = ar
+        ARCH = $(shell arch -s)
+
+        # XXX: needed for clang
+        C_WARNING_FLAGS += -Wno-unknown-warning-option -Wno-unused-private-field
+        CXX_WARNING_FLAGS += -Wno-unknown-warning-option -Wno-unused-private-field
+
+        INCLUDE_FLAGS += \
+            -I$(SERENITY_BASE_DIR)/Libraries/LibSerenity
+    else
+        TOOLCHAIN_PATH = $(SERENITY_BASE_DIR)/Toolchain/Local/bin
+        CXX = $(PRE_CXX) $(TOOLCHAIN_PATH)/i686-pc-serenity-g++
+        CC = $(PRE_CC) $(TOOLCHAIN_PATH)/i686-pc-serenity-gcc
+        AS = $(TOOLCHAIN_PATH)/i686-pc-serenity-as
+        LINK = $(TOOLCHAIN_PATH)/i686-pc-serenity-ld
+        RANLIB = $(TOOLCHAIN_PATH)/i686-pc-serenity-ranlib
+        AR = $(TOOLCHAIN_PATH)/i686-pc-serenity-ar
+        ARCH = i386
+
+        INCLUDE_FLAGS += \
+            -I$(SERENITY_BASE_DIR)/Libraries/LibC \
+            -I$(SERENITY_BASE_DIR)/Libraries/LibM \
+            -I$(SERENITY_BASE_DIR)/Libraries/LibPthread
+    endif
 
     DEFINES += -DDEBUG
-
-    INCLUDE_FLAGS += \
-    	-I$(SERENITY_BASE_DIR)/Libraries/LibC \
-    	-I$(SERENITY_BASE_DIR)/Libraries/LibM \
-    	-I$(SERENITY_BASE_DIR)/Libraries/LibPthread
 
     ifdef KERNEL
         DEFINES += -DKERNEL
@@ -65,6 +86,13 @@ else
     else
         # everything else gets -lc -lm
         LIB_DEPS := C M $(LIB_DEPS)
+    endif
+
+    ifeq ($(HOSTED),1)
+        # use the host's libc, libm, and pthread, and include LibSerenity
+        LIB_DEPS := $(filter-out C M Pthread,$(LIB_DEPS)) Serenity
+        LDFLAGS += -lc -lm -pthread
+        ARCH_FLAGS += -g
     endif
 
     # turn "LIB_DEPS=C Core Thread" into "-lc -lcore -lthread -L.../LibC ..."

@@ -19,6 +19,10 @@ ifneq (, $(shell which ccache))
   export PRE_CXX=ccache
 endif
 
+ifeq ($(HOSTED),1)
+    SUBDIRS := $(filter-out Kernel Userland,$(SUBDIRS))
+endif
+
 include Makefile.subdir
 
 all: subdirs
