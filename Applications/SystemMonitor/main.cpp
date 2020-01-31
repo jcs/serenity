@@ -59,6 +59,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#ifdef __OpenBSD__
+#include <sys/mount.h>
+#endif
+
 static String human_readable_size(u32 size)
 {
     if (size < (64 * KB))
@@ -333,10 +337,17 @@ NonnullRefPtr<GUI::Widget> build_file_systems_tab()
                 builder.append(name);
                 first = false;
             };
+
+#ifdef __OpenBSD__
+            check(MNT_NODEV, "nodev");
+            check(MNT_NOEXEC, "noexec");
+            check(MNT_NOSUID, "nosuid");
+#else
             check(MS_NODEV, "nodev");
             check(MS_NOEXEC, "noexec");
             check(MS_NOSUID, "nosuid");
             check(MS_BIND, "bind");
+#endif
             if (builder.string_view().is_empty())
                 return String("defaults");
             return builder.to_string();
