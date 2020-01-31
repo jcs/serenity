@@ -35,6 +35,7 @@
 #include <LibLine/Editor.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <pwd.h>
 #include <signal.h>
 #include <stdio.h>
@@ -54,6 +55,10 @@ static Line::Editor editor {};
 
 static int run_command(const String&);
 void cache_path();
+
+#ifndef __serenity__
+extern char **environ;
+#endif
 
 static String prompt()
 {
