@@ -31,6 +31,15 @@
 #endif
 
 extern "C" {
+
+void sysbeep()
+{
+    /*
+     * TODO: could use WSKBDIO_COMPLEXBELL ioctl on openbsd, but we may not be
+     * allowed to open /dev/wskbd or do ioctls here
+     */
+}
+
 int create_shared_buffer(int size, void** buffer)
 {
     int key, id = -1;
