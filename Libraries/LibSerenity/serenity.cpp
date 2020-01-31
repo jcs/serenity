@@ -84,6 +84,32 @@ int purge(int mode)
 
 #else
 
+int module_load(const char* path, size_t path_length)
+{
+    (void)path;
+    (void)path_length;
+    return -ENOTSUP;
+}
+
+int module_unload(const char* name, size_t name_length)
+{
+    (void)name;
+    (void)name_length;
+    return -ENOTSUP;
+}
+
+int profiling_enable(pid_t pid)
+{
+    (void)pid;
+    return -ENOTSUP;
+}
+
+int profiling_disable(pid_t pid)
+{
+    (void)pid;
+    return -ENOTSUP;
+}
+
 int set_process_boost(int tid, int amount)
 {
     /* TODO: use nice(3)? */
