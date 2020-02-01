@@ -115,6 +115,7 @@ void Service::setup_socket()
     ASSERT(m_socket_fd == -1);
 
     ensure_parent_directories(m_socket_path.characters());
+    (void)unlink(m_socket_path.characters());
 
     // Note: we use SOCK_CLOEXEC here to make sure we don't leak every socket to
     // all the clients. We'll make the one we do need to pass down !CLOEXEC later
