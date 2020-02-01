@@ -19,7 +19,9 @@ LIBC_OBJS = \
     serenity.o \
     mman.o \
     fcntl.o \
-    pthread.o
+    pthread.o \
+    fb.o \
+    sched.o
 
 OBJS = $(AK_OBJS) $(LIBC_OBJS)
 
