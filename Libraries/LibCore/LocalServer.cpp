@@ -112,11 +112,13 @@ bool LocalServer::listen(const String& address)
 #endif
     ASSERT(m_fd >= 0);
 
+#ifdef __serenity__
     rc = fchmod(m_fd, 0600);
     if (rc < 0) {
         perror("fchmod");
         ASSERT_NOT_REACHED();
     }
+#endif
 
     auto socket_address = SocketAddress::local(address);
     auto un = socket_address.to_sockaddr_un();
@@ -125,6 +127,14 @@ bool LocalServer::listen(const String& address)
         perror("bind");
         ASSERT_NOT_REACHED();
     }
+
+#ifndef __serenity__
+    rc = chmod(address.characters(), 0600);
+    if (rc < 0) {
+        perror("chmod");
+        ASSERT_NOT_REACHED();
+    }
+#endif
 
     rc = ::listen(m_fd, 5);
     if (rc < 0) {

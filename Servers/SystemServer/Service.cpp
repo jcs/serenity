@@ -125,6 +125,7 @@ void Service::setup_socket()
         ASSERT_NOT_REACHED();
     }
 
+#ifdef __serenity__
     if (fchown(m_socket_fd, m_uid, m_gid) < 0) {
         perror("fchown");
         ASSERT_NOT_REACHED();
@@ -134,14 +135,28 @@ void Service::setup_socket()
         perror("fchmod");
         ASSERT_NOT_REACHED();
     }
+#endif
 
     auto socket_address = Core::SocketAddress::local(m_socket_path);
     auto un = socket_address.to_sockaddr_un();
     int rc = bind(m_socket_fd, (const sockaddr*)&un, sizeof(un));
     if (rc < 0) {
+        dbg() << "Failed to bind on " << m_socket_path;
         perror("bind");
         ASSERT_NOT_REACHED();
     }
+
+#ifndef __serenity__
+    if (chown(m_socket_path.characters(), m_uid, m_gid) < 0) {
+        perror("fchown");
+        ASSERT_NOT_REACHED();
+    }
+
+    if (chmod(m_socket_path.characters(), m_socket_permissions) < 0) {
+        perror("fchmod");
+        ASSERT_NOT_REACHED();
+    }
+#endif
 
     rc = listen(m_socket_fd, 5);
     if (rc < 0) {
