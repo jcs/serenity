@@ -69,6 +69,12 @@ void* mmap_with_name(void* addr, size_t size, int prot, int flags, int fd, off_t
     return (void*)rc;
 #else
     (void)name;
+    // XXX: purgeable memory not supported, turn it into an anonymous mapping
+    if (flags & MAP_PURGEABLE)
+        flags = (flags & ~MAP_PURGEABLE) | MAP_ANONYMOUS;
+    // Using fd 0 seems like a bug, and should be -1 or mmap will EINVAL
+    if (fd == 0 && (flags & MAP_ANONYMOUS))
+        fd = -1;
     return mmap(addr, size, prot, flags, fd, offset);
 #endif
 }
