@@ -29,7 +29,13 @@
 #include "Event.h"
 #include "EventLoop.h"
 #include "WindowManager.h"
+#ifdef __serenity__
 #include <Kernel/FB.h>
+#elif defined(__OpenBSD__)
+#include <LibSerenity/FB.h>
+#include <sys/ttycom.h>
+#include <sys/ioctl.h>
+#endif
 #include <Kernel/MousePacket.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -50,9 +56,16 @@ Screen::Screen(unsigned desired_width, unsigned desired_height)
 {
     ASSERT(!s_the);
     s_the = this;
-    m_framebuffer_fd = open("/dev/fb0", O_RDWR | O_CLOEXEC);
+
+#if defined(__OpenBSD__)
+    auto fb_device = "/dev/ttyC4";
+#else
+    auto fb_device = "/dev/fb0";
+#endif
+
+    m_framebuffer_fd = open(fb_device, O_RDWR | O_CLOEXEC);
     if (m_framebuffer_fd < 0) {
-        perror("failed to open /dev/fb0");
+        perror("failed to open fb device");
         ASSERT_NOT_REACHED();
     }
 
