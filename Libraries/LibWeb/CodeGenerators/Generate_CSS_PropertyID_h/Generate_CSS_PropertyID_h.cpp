@@ -47,6 +47,8 @@ static String title_casify(const String& dashy_name)
 
 int main(int argc, char** argv)
 {
+    AK::dbg_raw(true);
+
     if (argc != 2) {
         fprintf(stderr, "usage: %s <path/to/CSS/Properties.json>\n", argv[0]);
         return 1;

@@ -34,6 +34,8 @@
 
 int main(int argc, char** argv)
 {
+    AK::dbg_raw(true);
+
     if (argc != 2) {
         printf("usage: %s <form-file>\n", argv[0]);
         return 0;

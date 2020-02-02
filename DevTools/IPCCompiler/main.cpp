@@ -62,6 +62,8 @@ struct Endpoint {
 
 int main(int argc, char** argv)
 {
+    AK::dbg_raw(true);
+
     if (argc != 2) {
         printf("usage: %s <IPC endpoint definition file>\n", argv[0]);
         return 0;
@@ -477,7 +479,7 @@ int main(int argc, char** argv)
         out() << "};";
     }
 
-#ifdef DEBUG
+#ifdef IPC_DEBUG
     for (auto& endpoint : endpoints) {
         warn() << "Endpoint: '" << endpoint.name << "' (magic: " << endpoint.magic << ")";
         for (auto& message : endpoint.messages) {

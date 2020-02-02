@@ -134,6 +134,7 @@ inline const LogStream& operator<<(const LogStream& stream, bool value)
 }
 
 DebugLogStream dbg();
+void dbg_raw(bool);
 
 #if defined(KERNEL)
 KernelLogStream klog();

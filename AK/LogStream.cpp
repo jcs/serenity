@@ -111,10 +111,20 @@ static TriState got_process_name = TriState::Unknown;
 static char process_name_buffer[256];
 #endif
 
+static bool s_dbg_raw = false;
+
+void dbg_raw(bool val)
+{
+    s_dbg_raw = val;
+}
+
 DebugLogStream dbg()
 {
     DebugLogStream stream;
 #if (defined(__serenity__) && !defined(KERNEL) && !defined(BOOTSTRAPPER)) || defined(__OpenBSD__)
+    if (s_dbg_raw)
+        return stream;
+
     if (got_process_name == TriState::Unknown) {
         if (get_process_name(process_name_buffer, sizeof(process_name_buffer)) == 0)
             got_process_name = TriState::True;
