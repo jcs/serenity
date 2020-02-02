@@ -6,6 +6,7 @@ __BEGIN_DECLS
 
 void sysbeep();
 
+int get_process_name(char* buffer, int buffer_size);
 int create_shared_buffer(int, void** buffer);
 int share_buffer_with(int, pid_t peer_pid);
 int share_buffer_globally(int);

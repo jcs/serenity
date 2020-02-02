@@ -32,6 +32,13 @@
 
 extern "C" {
 
+int get_process_name(char* buffer, int buffer_size)
+{
+    const char *progname = getprogname();
+    snprintf(buffer, buffer_size, "%s", progname);
+    return 0;
+}
+
 void sysbeep()
 {
     /*
