@@ -106,7 +106,7 @@ const LogStream& operator<<(const LogStream& stream, const void* value)
     return stream << buffer;
 }
 
-#if defined(__serenity__) && !defined(KERNEL) && !defined(BOOTSTRAPPER)
+#if (defined(__serenity__) && !defined(KERNEL) && !defined(BOOTSTRAPPER)) || defined(__OpenBSD__)
 static TriState got_process_name = TriState::Unknown;
 static char process_name_buffer[256];
 #endif
@@ -114,7 +114,7 @@ static char process_name_buffer[256];
 DebugLogStream dbg()
 {
     DebugLogStream stream;
-#if defined(__serenity__) && !defined(KERNEL) && !defined(BOOTSTRAPPER)
+#if (defined(__serenity__) && !defined(KERNEL) && !defined(BOOTSTRAPPER)) || defined(__OpenBSD__)
     if (got_process_name == TriState::Unknown) {
         if (get_process_name(process_name_buffer, sizeof(process_name_buffer)) == 0)
             got_process_name = TriState::True;
@@ -122,7 +122,15 @@ DebugLogStream dbg()
             got_process_name = TriState::False;
     }
     if (got_process_name == TriState::True)
-        stream << "\033[33;1m" << process_name_buffer << '(' << getpid() << ")\033[0m: ";
+        stream <<
+#ifndef __OpenBSD__
+            "\033[33;1m" <<
+#endif
+            process_name_buffer << '(' << getpid() << ")" <<
+#ifndef __OpenBSD__
+            "\033[0m" <<
+#endif
+            ": ";
 #endif
 #if defined(__serenity__) && defined(KERNEL) && !defined(BOOTSTRAPPER)
     if (Kernel::Thread::current)
