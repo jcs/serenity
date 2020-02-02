@@ -85,7 +85,11 @@ public:
         , m_client_id(client_id)
     {
         ASSERT(socket.is_connected());
+#ifdef __OpenBSD__
+        sockpeercred creds;
+#else
         ucred creds;
+#endif
         socklen_t creds_size = sizeof(creds);
         if (getsockopt(m_socket->fd(), SOL_SOCKET, SO_PEERCRED, &creds, &creds_size) < 0) {
             ASSERT_NOT_REACHED();
