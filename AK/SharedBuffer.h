@@ -26,7 +26,7 @@
 
 #pragma once
 
-#ifdef __serenity__
+#if defined(__serenity__) || defined(__OpenBSD__)
 
 #include <AK/RefCounted.h>
 #include <AK/RefPtr.h>

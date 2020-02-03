@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef __serenity__
+#if defined(__serenity__) || defined(__OpenBSD__)
 
 #include <AK/SharedBuffer.h>
 #include <AK/kmalloc.h>
