@@ -34,10 +34,12 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept rpath wpath cpath unix fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
     auto server = Core::LocalServer::construct();
@@ -62,10 +64,12 @@ int main(int argc, char** argv)
 
     unveil(nullptr, nullptr);
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept rpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     return app.exec();
 }

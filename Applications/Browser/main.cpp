@@ -67,16 +67,19 @@ int main(int argc, char** argv)
         return 1;
     }
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept unix cpath rpath wpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
     // Connect to the ProtocolServer immediately so we can drop the "unix" pledge.
     Web::ResourceLoader::the();
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept cpath rpath wpath", nullptr) < 0) {
         perror("pledge");
         return 1;
@@ -93,6 +96,7 @@ int main(int argc, char** argv)
     }
 
     unveil(nullptr, nullptr);
+#endif
 
     auto window = GUI::Window::construct();
     window->set_rect(100, 100, 640, 480);

@@ -41,17 +41,21 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio thread shared_buffer accept rpath unix wpath cpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio thread shared_buffer accept rpath wpath cpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     auto window = GUI::Window::construct();
     window->set_title("PaintBrush");

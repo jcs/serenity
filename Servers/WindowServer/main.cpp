@@ -39,10 +39,12 @@
 
 int main(int, char**)
 {
+#ifdef __serenity__
     if (pledge("stdio video thread shared_buffer accept rpath wpath cpath unix proc fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     if (unveil("/res", "r") < 0) {
         perror("unveil");
@@ -84,10 +86,12 @@ int main(int, char**)
 
     WindowServer::EventLoop loop;
 
+#ifdef __serenity__
     if (pledge("stdio video thread shared_buffer accept rpath wpath cpath proc", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     WindowServer::Screen screen(wm_config->read_num_entry("Screen", "Width", 1024),
         wm_config->read_num_entry("Screen", "Height", 768));

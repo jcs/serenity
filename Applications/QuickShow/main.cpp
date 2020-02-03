@@ -41,17 +41,21 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept rpath unix cpath fattr proc exec thread", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept rpath proc exec thread", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
 #if 0
     if (argc != 2) {

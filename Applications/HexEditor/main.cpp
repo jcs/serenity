@@ -30,17 +30,21 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept rpath unix cpath wpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept rpath cpath wpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     auto window = GUI::Window::construct();
     window->set_title("Hex Editor");

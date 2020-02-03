@@ -32,10 +32,12 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio inet dns unix shared_buffer cpath rpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     if (getuid() == 0) {
         fprintf(stderr, "Refusing to run as root\n");
@@ -44,10 +46,12 @@ int main(int argc, char** argv)
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio inet dns unix shared_buffer rpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     auto app_window = IRCAppWindow::construct();
     app_window->show();

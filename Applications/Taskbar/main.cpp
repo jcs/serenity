@@ -32,17 +32,21 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept proc exec rpath unix cpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept proc exec rpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     TaskbarWindow window;
     window.show();

@@ -174,10 +174,12 @@ RefPtr<GUI::Window> create_settings_window(TerminalWidget& terminal)
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio tty rpath accept cpath wpath shared_buffer proc exec unix fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     struct sigaction act;
     memset(&act, 0, sizeof(act));
@@ -191,10 +193,12 @@ int main(int argc, char** argv)
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio tty rpath accept cpath wpath shared_buffer proc exec", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     const char* command_to_execute = nullptr;
 

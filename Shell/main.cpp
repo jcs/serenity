@@ -1029,10 +1029,12 @@ void cache_path()
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio rpath wpath cpath proc exec tty", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     g.uid = getuid();
     tcsetpgrp(0, getpgrp());

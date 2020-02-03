@@ -127,17 +127,21 @@ bool make_is_available();
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio tty accept rpath cpath wpath shared_buffer proc exec unix fattr thread", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio tty accept rpath cpath wpath shared_buffer proc exec fattr thread", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     Function<void()> update_actions;
 

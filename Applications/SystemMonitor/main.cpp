@@ -81,17 +81,21 @@ static NonnullRefPtr<GUI::Widget> build_graphs_tab();
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio proc shared_buffer accept rpath unix cpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio proc shared_buffer accept rpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     if (unveil("/etc/passwd", "r") < 0) {
         perror("unveil");

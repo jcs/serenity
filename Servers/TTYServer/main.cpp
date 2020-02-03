@@ -33,10 +33,12 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio tty proc exec", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     if (unveil("/bin/Shell", "x") < 0) {
         perror("unveil");

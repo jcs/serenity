@@ -40,17 +40,21 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio dns inet shared_buffer rpath cpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio dns inet shared_buffer rpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     auto window = GUI::Window::construct();
     window->set_title("ChanViewer");

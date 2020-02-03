@@ -30,10 +30,12 @@
 
 int main(int, char**)
 {
+#ifdef __serenity__
     if (pledge("stdio thread shared_buffer accept rpath wpath cpath unix fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     Core::EventLoop event_loop;
     ASMixer mixer;
@@ -52,10 +54,12 @@ int main(int, char**)
         IPC::new_client_connection<ASClientConnection>(*client_socket, client_id, mixer);
     };
 
+#ifdef __serenity__
     if (pledge("stdio thread shared_buffer accept", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     return event_loop.exec();
 }

@@ -64,10 +64,12 @@ private:
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio shared_buffer rpath cpath unix fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     if (unveil("/res", "r") < 0) {
         perror("unveil");
@@ -96,10 +98,12 @@ int main(int argc, char** argv)
     window->resize(widget.get_width(), 16);
     window->show();
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer rpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     return app.exec();
 }

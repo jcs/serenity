@@ -30,17 +30,21 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio thread rpath accept cpath wpath shared_buffer unix fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio thread rpath accept cpath wpath shared_buffer", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     auto window = GUI::Window::construct();
     window->set_title("Text Editor");

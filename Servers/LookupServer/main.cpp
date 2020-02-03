@@ -34,18 +34,22 @@ int main(int argc, char** argv)
     (void)argc;
     (void)argv;
 
+#ifdef __serenity__
     if (pledge("stdio accept unix inet cpath rpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     Core::EventLoop event_loop;
     LookupServer server;
 
+#ifdef __serenity__
     if (pledge("stdio accept inet", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     unveil(nullptr, nullptr);
 

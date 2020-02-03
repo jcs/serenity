@@ -60,10 +60,12 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio thread shared_buffer accept unix cpath rpath wpath fattr proc exec", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     struct sigaction act;
     memset(&act, 0, sizeof(act));
@@ -79,10 +81,12 @@ int main(int argc, char** argv)
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio thread shared_buffer accept cpath rpath wpath fattr proc exec", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     auto window = GUI::Window::construct();
     window->set_title("File Manager");

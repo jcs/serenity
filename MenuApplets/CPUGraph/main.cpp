@@ -111,17 +111,21 @@ private:
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept proc exec rpath unix cpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept proc exec rpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     auto window = GUI::Window::construct();
     window->set_title("CPUGraph");
@@ -143,10 +147,12 @@ int main(int argc, char** argv)
         return 1;
     }
 
+#ifdef __serenity__
     if (unveil("/proc/all", "r") < 0) {
         perror("unveil");
         return 1;
     }
+#endif
 
     if (unveil("/bin/SystemMonitor", "x") < 0) {
         perror("unveil");

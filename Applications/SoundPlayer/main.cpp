@@ -38,25 +38,31 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept rpath unix cpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept rpath unix", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     auto audio_client = Audio::ClientConnection::construct();
     audio_client->handshake();
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept rpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     auto window = GUI::Window::construct();
     window->set_title("SoundPlayer");

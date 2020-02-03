@@ -36,17 +36,21 @@
 
 int main(int argc, char** argv)
 {
+#ifdef __serenity__
     if (pledge("stdio shared_buffer rpath accept unix cpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer rpath accept", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     if (unveil("/res", "r") < 0) {
         perror("unveil");

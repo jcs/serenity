@@ -37,10 +37,12 @@ int main(int argc, char** argv)
 {
     GUI::Application app(argc, argv);
 
+#ifdef __serenity__
     if (pledge("stdio rpath shared_buffer", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     auto window = GUI::Window::construct();
 

@@ -32,16 +32,23 @@
 
 int main(int, char**)
 {
+#ifdef __serenity__
     if (pledge("stdio inet shared_buffer accept unix rpath cpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
+
     Core::EventLoop event_loop;
+
+#ifdef __serenity__
     // FIXME: Establish a connection to LookupServer and then drop "unix"?
     if (pledge("stdio inet shared_buffer accept unix", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
+
     (void)*new HttpProtocol;
     auto server = Core::LocalServer::construct();
     bool ok = server->take_over_from_system_server();

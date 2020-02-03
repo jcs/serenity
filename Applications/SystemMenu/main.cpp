@@ -76,6 +76,7 @@ int main(int argc, char** argv)
 
     GUI::WindowServerConnection::the().send_sync<Messages::WindowServer::SetSystemMenu>(menu->menu_id());
 
+#ifdef __serenity__
     if (pledge("stdio shared_buffer accept rpath proc exec", nullptr) < 0) {
         perror("pledge");
         return 1;
@@ -97,6 +98,7 @@ int main(int argc, char** argv)
     }
 
     unveil(nullptr, nullptr);
+#endif
 
     return app.exec();
 }

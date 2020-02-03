@@ -105,10 +105,12 @@ static void mount_all_filesystems()
 
 int main(int, char**)
 {
+#ifdef __serenity__
     if (pledge("stdio proc exec tty accept unix rpath wpath cpath chown fattr id", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     mount_all_filesystems();
 

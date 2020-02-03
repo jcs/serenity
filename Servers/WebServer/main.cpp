@@ -35,10 +35,12 @@ int main(int argc, char** argv)
     (void)argc;
     (void)argv;
 
+#ifdef __serenity__
     if (pledge("stdio accept rpath inet unix cpath fattr", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     Core::EventLoop loop;
 
@@ -60,10 +62,12 @@ int main(int argc, char** argv)
 
     unveil(nullptr, nullptr);
 
+#ifdef __serenity__
     if (pledge("stdio accept rpath", nullptr) < 0) {
         perror("pledge");
         return 1;
     }
+#endif
 
     return loop.exec();
 }
