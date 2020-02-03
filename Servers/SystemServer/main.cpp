@@ -64,6 +64,10 @@ static void sigchld_handler(int)
 
 static void check_for_test_mode()
 {
+#ifndef __serenity__
+    return;
+#endif
+
     auto f = Core::File::construct("/proc/cmdline");
     if (!f->open(Core::IODevice::ReadOnly)) {
         dbg() << "Failed to read command line: " << f->error_string();
@@ -88,6 +92,10 @@ static void check_for_test_mode()
 
 static void mount_all_filesystems()
 {
+#ifndef __serenity__
+    return;
+#endif
+
     dbg() << "Spawning mount -a to mount all filesystems.";
     pid_t pid = fork();
 
