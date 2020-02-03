@@ -1179,6 +1179,8 @@ int main(int argc, char** argv)
 
     {
         auto* cwd = getcwd(nullptr, 0);
+        if (cwd == nullptr)
+            cwd = strdup("/");
         g.cwd = cwd;
         setenv("PWD", cwd, 1);
         free(cwd);
