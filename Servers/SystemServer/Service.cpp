@@ -272,6 +272,13 @@ void Service::spawn()
                 dbgprintf("Failed to drop privileges (GID=%u, UID=%u)\n", m_gid, m_uid);
                 exit(1);
             }
+
+            auto* pwd = getpwuid(getuid());
+            String path = pwd ? pwd->pw_dir : "/";
+            setenv("HOME", path.characters(), true);
+            endpwent();
+            if (chdir(path.characters()) == -1)
+                chdir("/");
         }
 
         char* argv[m_extra_arguments.size() + 2];
