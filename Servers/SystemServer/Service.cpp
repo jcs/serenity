@@ -204,6 +204,11 @@ void Service::spawn()
     } else if (m_pid == 0) {
         // We are the child.
 
+        if (setsid() == -1) {
+            perror("setsid");
+            ASSERT_NOT_REACHED();
+        }
+
         if (!m_working_directory.is_null()) {
             if (chdir(m_working_directory.characters()) < 0) {
                 perror("chdir");
@@ -256,7 +261,14 @@ void Service::spawn()
         }
 
         if (!m_user.is_null()) {
-            if (setgid(m_gid) < 0 || setgroups(m_extra_gids.size(), m_extra_gids.data()) < 0 || setuid(m_uid) < 0) {
+            setlogin(m_user.characters());
+            if (setgroups(m_extra_gids.size(), m_extra_gids.data()) < 0 ||
+#ifdef __serenity__
+              setgid(m_gid) < 0 || setuid(m_uid) < 0
+#else
+              setresgid(m_gid, m_gid, m_gid) < 0 || setresuid(m_uid, m_uid, m_uid) < 0
+#endif
+              ) {
                 dbgprintf("Failed to drop privileges (GID=%u, UID=%u)\n", m_gid, m_uid);
                 exit(1);
             }
