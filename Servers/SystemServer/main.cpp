@@ -120,6 +120,21 @@ int main(int, char**)
     }
 #endif
 
+    if (getuid() != 0) {
+        printf("not root\n");
+        return 1;
+    }
+
+    if (setsid() == -1) {
+        perror("setsid");
+        return 1;
+    }
+
+    if (setlogin("root") == -1) {
+        perror("setlogin");
+        return 1;
+    }
+
     mount_all_filesystems();
 
     struct sigaction sa = {
