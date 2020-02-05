@@ -51,6 +51,13 @@ int main(int, char**)
         return 1;
     }
 
+#ifdef __OpenBSD__
+    if (unveil("/etc/pwd.db", "r") < 0) {
+        perror("unveil");
+        return 1;
+    }
+#endif
+
     if (unveil("/tmp", "cw") < 0) {
         perror("unveil");
         return 1;
