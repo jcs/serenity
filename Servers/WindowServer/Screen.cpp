@@ -102,17 +102,22 @@ bool Screen::set_resolution(int width, int height)
 
 void Screen::on_change_resolution(int pitch, int width, int height)
 {
-    if (m_framebuffer) {
-        size_t previous_size_in_bytes = m_size_in_bytes;
-        int rc = munmap(m_framebuffer, previous_size_in_bytes);
+    if (m_can_set_buffer && m_framebuffer[1] && m_framebuffer[1] != m_framebuffer[0]) {
+        int rc = munmap(m_framebuffer[1], m_size_in_bytes);
+        ASSERT(rc == 0);
+    }
+    if (m_framebuffer[0]) {
+        int rc = munmap(m_framebuffer[0], m_size_in_bytes);
         ASSERT(rc == 0);
     }
 
     int rc = fb_get_size_in_bytes(m_framebuffer_fd, &m_size_in_bytes);
     ASSERT(rc == 0);
 
-    m_framebuffer = (Gfx::RGBA32*)mmap(nullptr, m_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, m_framebuffer_fd, 0);
-    ASSERT(m_framebuffer && m_framebuffer != (void*)-1);
+    m_framebuffer[0] = (Gfx::RGBA32*)mmap(nullptr, m_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, m_framebuffer_fd, 0);
+    if (m_can_set_buffer)
+        m_framebuffer[1] = m_framebuffer[0];
+    ASSERT(m_framebuffer[0] && m_framebuffer[0] != (void*)-1);
 
     m_pitch = pitch;
     m_width = width;

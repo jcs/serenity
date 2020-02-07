@@ -65,7 +65,7 @@ private:
 
     size_t m_size_in_bytes;
 
-    Gfx::RGBA32* m_framebuffer { nullptr };
+    Gfx::RGBA32* m_framebuffer[2] { nullptr };
     bool m_can_set_buffer { false };
 
     int m_pitch { 0 };
@@ -80,7 +80,13 @@ private:
 
 inline Gfx::RGBA32* Screen::scanline(int y)
 {
-    return reinterpret_cast<Gfx::RGBA32*>(((u8*)m_framebuffer) + (y * m_pitch));
+    size_t off = y * m_pitch;
+    int index = 0;
+    if (off >= m_size_in_bytes) {
+        off -= m_size_in_bytes;
+        index++;
+    }
+    return reinterpret_cast<Gfx::RGBA32*>(((u8*)m_framebuffer[index]) + off);
 }
 
 }
