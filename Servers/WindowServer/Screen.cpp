@@ -33,8 +33,6 @@
 #include <Kernel/FB.h>
 #elif defined(__OpenBSD__)
 #include <LibSerenity/FB.h>
-#include <sys/ttycom.h>
-#include <sys/ioctl.h>
 #endif
 #include <Kernel/MousePacket.h>
 #include <fcntl.h>
@@ -58,16 +56,18 @@ Screen::Screen(unsigned desired_width, unsigned desired_height)
     s_the = this;
 
 #if defined(__OpenBSD__)
-    auto fb_device = "/dev/ttyC4";
-#else
-    auto fb_device = "/dev/fb0";
-#endif
-
-    m_framebuffer_fd = open(fb_device, O_RDWR | O_CLOEXEC);
+    m_framebuffer_fd = open("/dev/drm0", O_RDWR | O_CLOEXEC);
     if (m_framebuffer_fd < 0) {
-        perror("failed to open fb device");
+        perror("failed to open /dev/drm0");
         ASSERT_NOT_REACHED();
     }
+#else
+    m_framebuffer_fd = open("/dev/fb0", O_RDWR | O_CLOEXEC);
+    if (m_framebuffer_fd < 0) {
+        perror("failed to open /dev/fb0");
+        ASSERT_NOT_REACHED();
+    }
+#endif
 
     if (fb_set_buffer(m_framebuffer_fd, 0) == 0) {
         m_can_set_buffer = true;
@@ -114,9 +114,15 @@ void Screen::on_change_resolution(int pitch, int width, int height)
     int rc = fb_get_size_in_bytes(m_framebuffer_fd, &m_size_in_bytes);
     ASSERT(rc == 0);
 
+#ifdef __OpenBSD__
+    m_framebuffer[0] = (Gfx::RGBA32*)fb_get_addr(m_framebuffer_fd, 0);
+    if (m_can_set_buffer)
+        m_framebuffer[1] = (Gfx::RGBA32*)fb_get_addr(m_framebuffer_fd, 1);
+#else
     m_framebuffer[0] = (Gfx::RGBA32*)mmap(nullptr, m_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, m_framebuffer_fd, 0);
     if (m_can_set_buffer)
         m_framebuffer[1] = m_framebuffer[0];
+#endif
     ASSERT(m_framebuffer[0] && m_framebuffer[0] != (void*)-1);
 
     m_pitch = pitch;

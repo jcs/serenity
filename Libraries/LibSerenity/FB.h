@@ -17,4 +17,8 @@ int fb_set_resolution(int, FBResolution*);
 int fb_get_buffer(int, int*);
 int fb_set_buffer(int, int);
 
+#ifdef __OpenBSD__
+void *fb_get_addr(int, int);
+#endif
+
 __END_DECLS
