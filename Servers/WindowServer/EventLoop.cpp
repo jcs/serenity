@@ -46,128 +46,118 @@
 
 #ifdef __OpenBSD__
 #include <dev/wscons/wsconsio.h>
-#include <dev/wscons/wskbdraw.h>
+#include <dev/wscons/wsksymdef.h>
 
-static struct kbd_trans {
+static const struct kbd_trans {
     int wskbd_value;
+    int wsusb_value;
     KeyCode keycode;
     u8 character;
     KeyCode shifted_keycode;
     u8 shifted_character;
 } kbd_trans_table[] = {
-    { RAWKEY_Escape,    Key_Escape, '\033', Key_Escape, '\033' },
-    { RAWKEY_1,		    Key_1,      '1',    Key_ExclamationPoint, '!' },
-    { RAWKEY_2,		    Key_2,      '2',    Key_AtSign, '@' },
-    { RAWKEY_3,		    Key_3,      '3',    Key_Hashtag, '#' },
-    { RAWKEY_4,		    Key_4,      '4',    Key_Dollar, '$' },
-    { RAWKEY_5,		    Key_5,      '5',    Key_Percent, '%' },
-    { RAWKEY_6,		    Key_6,      '6',    Key_Circumflex, '^' },
-    { RAWKEY_7,		    Key_7,      '7',    Key_Ampersand, '&' },
-    { RAWKEY_8,		    Key_8,      '8',    Key_Asterisk, '*' },
-    { RAWKEY_9,		    Key_9,      '9',    Key_LeftParen, '(' },
-    { RAWKEY_0,		    Key_0,      '0',    Key_RightParen, ')' },
-    { RAWKEY_minus,		Key_Minus,  '-',    Key_Underscore, '_' },
-    { RAWKEY_equal,		Key_Equal,  '=',    Key_Plus, '+' },
-    { RAWKEY_Tab,		Key_Tab,    '\t',   Key_Tab, '\t' },
-    { 14,               Key_Backspace, 0x8, Key_Backspace, 0x8 },
-    { RAWKEY_q,		    Key_Q,      'q',    Key_Q, 'Q' },
-    { RAWKEY_w,		    Key_W,      'w',    Key_W, 'W' },
-    { RAWKEY_e,		    Key_E,      'e',    Key_E, 'E' },
-    { RAWKEY_r,		    Key_R,      'r',    Key_R, 'R' },
-    { RAWKEY_t,		    Key_T,      't',    Key_T, 'T' },
-    { RAWKEY_y,		    Key_Y,      'y',    Key_Y, 'Y' },
-    { RAWKEY_u,		    Key_U,      'u',    Key_U, 'U' },
-    { RAWKEY_i,		    Key_I,      'i',    Key_I, 'I' },
-    { RAWKEY_o,		    Key_O,      'o',    Key_O, 'O' },
-    { RAWKEY_p,		    Key_P,      'p',    Key_P, 'P' },
-    { RAWKEY_bracketleft, Key_LeftBracket,  '[', Key_LeftBrace, '{' },
-    { RAWKEY_bracketright, Key_RightBracket, ']', Key_RightBrace, '}' },
-    { RAWKEY_Return,    Key_Return, '\n',   Key_Return, '\n' },
-    { RAWKEY_Control_L,	Key_Control, 0,     Key_Control, 0 },
-    { RAWKEY_a,		    Key_A,      'a',    Key_A, 'A' },
-    { RAWKEY_s,		    Key_S,      's',    Key_S, 'S' },
-    { RAWKEY_d,		    Key_D,      'd',    Key_D, 'D' },
-    { RAWKEY_f,		    Key_F,      'f',    Key_F, 'F' },
-    { RAWKEY_g,		    Key_G,      'g',    Key_G, 'G' },
-    { RAWKEY_h,		    Key_H,      'h',    Key_H, 'H' },
-    { RAWKEY_j,		    Key_J,      'j',    Key_J, 'J' },
-    { RAWKEY_k,		    Key_K,      'k',    Key_K, 'K' },
-    { RAWKEY_l,		    Key_L,      'l',    Key_L, 'L' },
-    { RAWKEY_semicolon,	Key_Semicolon, ';', Key_Colon, ':' },
-    { RAWKEY_apostrophe, Key_Apostrophe, '\'', Key_DoubleQuote, '"' },
-    { RAWKEY_grave,		Key_Backtick, '`',  Key_Tilde, '~' },
-    { RAWKEY_Shift_L,   Key_Shift,  0,      Key_Shift, 0 },
-    { RAWKEY_backslash, Key_Backslash, '\\', Key_Pipe, '|' },
-    { RAWKEY_z,		    Key_Z,      'z',    Key_Z, 'Z' },
-    { RAWKEY_x,		    Key_X,      'x',    Key_X, 'X' },
-    { RAWKEY_c,		    Key_C,      'c',    Key_C, 'C' },
-    { RAWKEY_v,		    Key_V,      'v',    Key_V, 'V' },
-    { RAWKEY_b,		    Key_B,      'b',    Key_B, 'B' },
-    { RAWKEY_n,		    Key_N,      'n',    Key_N, 'N' },
-    { RAWKEY_m,		    Key_M,      'm',    Key_M, 'M' },
-    { RAWKEY_comma,		Key_Comma,  ',',    Key_LessThan, '<' },
-    { RAWKEY_period,    Key_Period, '.',    Key_GreaterThan, '>' },
-    { RAWKEY_slash,		Key_Slash,  '/',    Key_QuestionMark, '?' },
-    { RAWKEY_Shift_R,   Key_Shift,  0,      Key_Shift, 0 },
-    { RAWKEY_KP_Multiply, Key_Asterisk, '*', Key_Asterisk, '*' },
-    { RAWKEY_Alt_L,		Key_Alt,    0,      Key_Alt, 0 },
-    { RAWKEY_space,		Key_Space,  ' ',    Key_Space, ' ' },
-    { RAWKEY_Caps_Lock,	Key_CapsLock, 0,    Key_CapsLock, 0 },
-    { RAWKEY_f1,		Key_F1,     0,      Key_F1, 0 },
-    { RAWKEY_f2,		Key_F2,     0,      Key_F2, 0 },
-    { RAWKEY_f3,		Key_F3,     0,      Key_F3, 0 },
-    { RAWKEY_f4,		Key_F4,     0,      Key_F4, 0 },
-    { RAWKEY_f5,		Key_F5,     0,      Key_F5, 0 },
-    { RAWKEY_f6,		Key_F6,     0,      Key_F6, 0 },
-    { RAWKEY_f7,		Key_F7,     0,      Key_F7, 0 },
-    { RAWKEY_f8,		Key_F8,     0,      Key_F8, 0 },
-    { RAWKEY_f9,		Key_F9,     0,      Key_F9, 0 },
-    { RAWKEY_f10,		Key_F10,    0,      Key_F10, 0 },
-    { RAWKEY_Num_Lock,  Key_NumLock, 0,     Key_NumLock, 0 },
-    { RAWKEY_Hold_Screen, Key_SysRq, 0,     Key_SysRq, 0 },
-    { RAWKEY_KP_Home,	Key_Home,   0,      Key_Home, 0 },
-    { RAWKEY_KP_Up,		Key_Up,     0,      Key_Up, 0 },
-    { RAWKEY_KP_Prior,	Key_PageUp, 0,      Key_PageUp, 0 },
-    { RAWKEY_KP_Subtract, Key_Minus, '-',   Key_Minus, '-' },
-    { RAWKEY_KP_Left,	Key_Left,   0,      Key_Left, 0 },
-#if 0
-    { RAWKEY_KP_Begin, },
-#endif
-    { RAWKEY_KP_Right,  Key_Right,  0,      Key_Right, 0 },
-    { RAWKEY_KP_Add,	Key_Plus,   '+',    Key_Plus, '+' },
-    { RAWKEY_KP_End,	Key_End,    0,      Key_End, 0 },
-    { RAWKEY_KP_Down,	Key_Down,   0,      Key_Down, 0 },
-    { RAWKEY_KP_Next,	Key_PageDown, 0,    Key_PageDown, 0 },
-    { RAWKEY_KP_Insert,	Key_Insert, 0,      Key_Insert, 0 },
-    { RAWKEY_KP_Delete,	Key_Delete, 0,      Key_Delete, 0 },
-#if 0
-    { RAWKEY_less, },
-#endif
-    { RAWKEY_f11,		Key_F11,    0,      Key_F11, 0 },
-    { RAWKEY_f12,		Key_F12,    0,      Key_F12, 0 },
-    { RAWKEY_Print_Screen, Key_PrintScreen, 0, Key_PrintScreen, 0 },
-#if 0
-    { RAWKEY_Pause, },
-#endif
-    { RAWKEY_Meta_L,	Key_Alt,    0,      Key_Alt, 0 },
-    { RAWKEY_Meta_R,	Key_Alt,    0,      Key_Alt, 0 },
-    { RAWKEY_KP_Equal,	Key_Equal,  '=',    Key_Equal, '=' },
-    { RAWKEY_KP_Enter,	Key_Return, '\n',   Key_Return, '\n' },
-    { RAWKEY_Control_R,	Key_Control, 0,     Key_Control, 0 },
-    { RAWKEY_KP_Divide,	Key_Slash,  '/',    Key_Slash, '/' },
-    { RAWKEY_Alt_R,		Key_Alt,    0,      Key_Alt, 0 },
-    { RAWKEY_Home,		Key_Home,   0,      Key_Home, 0 },
-    { RAWKEY_Up,		Key_Up,     0,      Key_Up, 0 },
-    { RAWKEY_Prior,		Key_PageUp, 0,      Key_PageUp, 0 },
-    { RAWKEY_Left,		Key_Left,   0,      Key_Left, 0 },
-    { RAWKEY_Right,		Key_Right,  0,      Key_Right, 0 },
-    { RAWKEY_End,		Key_End,    0,      Key_End, 0 },
-    { RAWKEY_Down,		Key_Down,   0,      Key_Down, 0 },
-    { RAWKEY_Next,		Key_PageDown, 0,    Key_PageDown, 0 },
-    { RAWKEY_Insert,	Key_Insert, 0,      Key_Insert, 0 },
-    { RAWKEY_Delete,    Key_Delete, 0,      Key_Delete, 0 },
-    { RAWKEY_Delete,    Key_Delete, 0,      Key_Delete, 0 },
-    { 219,              Key_Logo,   0,      Key_Logo, 0 },
+    { KS_Escape,    41,     Key_Escape, '\033', Key_Escape, '\033' },
+    { KS_1,		    30,     Key_1,      '1',    Key_ExclamationPoint, '!' },
+    { KS_2,		    31,     Key_2,      '2',    Key_AtSign, '@' },
+    { KS_3,		    32,     Key_3,      '3',    Key_Hashtag, '#' },
+    { KS_4,		    33,     Key_4,      '4',    Key_Dollar, '$' },
+    { KS_5,		    34,     Key_5,      '5',    Key_Percent, '%' },
+    { KS_6,		    35,     Key_6,      '6',    Key_Circumflex, '^' },
+    { KS_7,		    36,     Key_7,      '7',    Key_Ampersand, '&' },
+    { KS_8,		    37,     Key_8,      '8',    Key_Asterisk, '*' },
+    { KS_9,		    38,     Key_9,      '9',    Key_LeftParen, '(' },
+    { KS_0,		    39,     Key_0,      '0',    Key_RightParen, ')' },
+    { KS_minus,		45,     Key_Minus,  '-',    Key_Underscore, '_' },
+    { KS_equal,		46,     Key_Equal,  '=',    Key_Plus, '+' },
+    { KS_Tab,		43,     Key_Tab,    '\t',   Key_Tab, '\t' },
+    { KS_Delete,    42,     Key_Backspace, 0x8, Key_Backspace, 0x8 },
+    { KS_q,		    20,     Key_Q,      'q',    Key_Q, 'Q' },
+    { KS_w,		    26,     Key_W,      'w',    Key_W, 'W' },
+    { KS_e,		    8,      Key_E,      'e',    Key_E, 'E' },
+    { KS_r,		    21,     Key_R,      'r',    Key_R, 'R' },
+    { KS_t,		    23,     Key_T,      't',    Key_T, 'T' },
+    { KS_y,		    28,     Key_Y,      'y',    Key_Y, 'Y' },
+    { KS_u,		    24,     Key_U,      'u',    Key_U, 'U' },
+    { KS_i,		    12,     Key_I,      'i',    Key_I, 'I' },
+    { KS_o,		    18,     Key_O,      'o',    Key_O, 'O' },
+    { KS_p,		    19,     Key_P,      'p',    Key_P, 'P' },
+    { KS_bracketleft, 47,   Key_LeftBracket,  '[', Key_LeftBrace, '{' },
+    { KS_bracketright, 48,  Key_RightBracket, ']', Key_RightBrace, '}' },
+    { KS_Return,    40,     Key_Return, '\n',   Key_Return, '\n' },
+    { KS_Control_L,	224,    Key_Control, 0,     Key_Control, 0 },
+    { KS_a,		    4,      Key_A,      'a',    Key_A, 'A' },
+    { KS_s,		    22,     Key_S,      's',    Key_S, 'S' },
+    { KS_d,		    7,      Key_D,      'd',    Key_D, 'D' },
+    { KS_f,		    9,      Key_F,      'f',    Key_F, 'F' },
+    { KS_g,		    10,     Key_G,      'g',    Key_G, 'G' },
+    { KS_h,		    11,     Key_H,      'h',    Key_H, 'H' },
+    { KS_j,		    13,     Key_J,      'j',    Key_J, 'J' },
+    { KS_k,		    14,     Key_K,      'k',    Key_K, 'K' },
+    { KS_l,		    15,     Key_L,      'l',    Key_L, 'L' },
+    { KS_semicolon,	51,     Key_Semicolon, ';', Key_Colon, ':' },
+    { KS_apostrophe, 52,    Key_Apostrophe, '\'', Key_DoubleQuote, '"' },
+    { KS_grave,		53,     Key_Backtick, '`',  Key_Tilde, '~' },
+    { KS_Shift_L,   225,    Key_Shift,  0,      Key_Shift, 0 },
+    { KS_backslash, 49,     Key_Backslash, '\\', Key_Pipe, '|' },
+    { KS_z,		    29,     Key_Z,      'z',    Key_Z, 'Z' },
+    { KS_x,		    27,     Key_X,      'x',    Key_X, 'X' },
+    { KS_c,		    6,      Key_C,      'c',    Key_C, 'C' },
+    { KS_v,		    25,     Key_V,      'v',    Key_V, 'V' },
+    { KS_b,		    5,      Key_B,      'b',    Key_B, 'B' },
+    { KS_n,		    17,     Key_N,      'n',    Key_N, 'N' },
+    { KS_m,		    16,     Key_M,      'm',    Key_M, 'M' },
+    { KS_comma,		54,     Key_Comma,  ',',    Key_LessThan, '<' },
+    { KS_period,    55,     Key_Period, '.',    Key_GreaterThan, '>' },
+    { KS_slash,		56,     Key_Slash,  '/',    Key_QuestionMark, '?' },
+    { KS_Shift_R,   0,      Key_Shift,  0,      Key_Shift, 0 },
+    { KS_multiply,  85,     Key_Asterisk, '*', Key_Asterisk, '*' },
+    { KS_Alt_L,		226,    Key_Alt,    0,      Key_Alt, 0 },
+    { KS_space,		44,     Key_Space,  ' ',    Key_Space, ' ' },
+    { KS_Caps_Lock,	57,     Key_CapsLock, 0,    Key_CapsLock, 0 },
+    { KS_f1,		58,     Key_F1,     0,      Key_F1, 0 },
+    { KS_f2,		59,     Key_F2,     0,      Key_F2, 0 },
+    { KS_f3,		60,     Key_F3,     0,      Key_F3, 0 },
+    { KS_f4,		61,     Key_F4,     0,      Key_F4, 0 },
+    { KS_f5,		62,     Key_F5,     0,      Key_F5, 0 },
+    { KS_f6,		63,     Key_F6,     0,      Key_F6, 0 },
+    { KS_f7,		64,     Key_F7,     0,      Key_F7, 0 },
+    { KS_f8,		65,     Key_F8,     0,      Key_F8, 0 },
+    { KS_f9,		66,     Key_F9,     0,      Key_F9, 0 },
+    { KS_f10,		67,     Key_F10,    0,      Key_F10, 0 },
+    { KS_Num_Lock,  83,     Key_NumLock, 0,     Key_NumLock, 0 },
+    { KS_Hold_Screen, 71,   Key_SysRq,  0,      Key_SysRq, 0 },
+    { KS_Home,	    74,     Key_Home,   0,      Key_Home, 0 },
+    { KS_Up,		82,     Key_Up,     0,      Key_Up, 0 },
+    { KS_Prior,	    75,     Key_PageUp, 0,      Key_PageUp, 0 },
+    { KS_Alt_R,		230,    Key_Alt,    0,      Key_Alt, 0 },
+    { KS_Control_R,	228,    Key_Control, 0,     Key_Control, 0 },
+    { KS_KP_Subtract, 86,   Key_Minus, '-',   Key_Minus, '-' },
+    { KS_Left,	    80,     Key_Left,   0,      Key_Left, 0 },
+    { KS_Right,     79,     Key_Right,  0,      Key_Right, 0 },
+    { KS_KP_Add,	87,     Key_Plus,   '+',    Key_Plus, '+' },
+    { KS_End,   	77,     Key_End,    0,      Key_End, 0 },
+    { KS_Down,  	81,     Key_Down,   0,      Key_Down, 0 },
+    { KS_Next,  	78,     Key_PageDown, 0,    Key_PageDown, 0 },
+    { KS_Insert,	73,     Key_Insert, 0,      Key_Insert, 0 },
+    { KS_Delete,	76,     Key_Delete, 0,      Key_Delete, 0 },
+    { KS_Print_Screen, 70,  Key_PrintScreen, 0, Key_PrintScreen, 0 },
+    { KS_f11,		68,     Key_F11,    0,      Key_F11, 0 },
+    { KS_f12,		69,     Key_F12,    0,      Key_F12, 0 },
+    { KS_KP_Divide,	84,     Key_Slash,  '/',    Key_Slash, '/' },
+    { KS_Pause,     72,     Key_Invalid, 0,     Key_Invalid, 0 },
+    { KS_KP_7,      95,     Key_7,      '7',    Key_7, '7' },
+    { KS_KP_8,      96,     Key_8,      '8',    Key_8, '8' },
+    { KS_KP_9,      97,     Key_9,      '9',    Key_9, '9' },
+    { KS_KP_4,      92,     Key_4,      '4',    Key_4, '4' },
+    { KS_KP_5,      93,     Key_5,      '5',    Key_5, '5' },
+    { KS_KP_6,      94,     Key_6,      '6',    Key_6, '6' },
+    { KS_KP_1,      89,     Key_1,      '1',    Key_1, '1' },
+    { KS_KP_2,      90,     Key_2,      '2',    Key_2, '2' },
+    { KS_KP_3,      91,     Key_3,      '3',    Key_3, '3' },
+    { KS_KP_0,      98,     Key_0,      '0',    Key_0, '0' },
+    { KS_KP_Decimal, 99,    Key_Period, '.',    Key_Period, '.' },
+    { KS_KP_Enter,  88,     Key_Return, '\n',   Key_Return, '\n' },
+    { 219,          101,    Key_Logo,   0,      Key_Logo, 0 },
 };
 
 static int kbd_modifiers = 0;
@@ -338,74 +328,73 @@ void EventLoop::drain_keyboard()
         ::KeyEvent event;
 #ifdef __OpenBSD__
         struct wscons_event wsevent;
-        ssize_t nread = read(m_keyboard_fd, (u8*)&wsevent, sizeof(wsevent));
-        if (nread < (ssize_t)sizeof(wsevent)) {
-            nread = 0;
+        ssize_t nread = 0;
+        if (read(m_keyboard_fd, (u8*)&wsevent, sizeof(wsevent)) < (ssize_t)sizeof(wsevent))
             break;
-        }
 
         memset(&event, 0, sizeof(event));
 
-        switch (wsevent.type) {
-        case WSCONS_EVENT_KEY_UP:
-            switch (wsevent.value) {
-            case RAWKEY_Shift_L:
-            case RAWKEY_Shift_R:
-                kbd_modifiers &= ~Mod_Shift;
-                break;
-            case RAWKEY_Control_L:
-            case RAWKEY_Control_R:
-                kbd_modifiers &= ~Mod_Ctrl;
-                break;
-            case RAWKEY_Alt_L:
-            case RAWKEY_Alt_R:
-            case RAWKEY_Meta_L:
-            case RAWKEY_Meta_R:
-                kbd_modifiers &= ~Mod_Alt;
-                break;
-            }
-            break;
-        case WSCONS_EVENT_KEY_DOWN:
-            switch (wsevent.value) {
-            case RAWKEY_Shift_L:
-            case RAWKEY_Shift_R:
-                kbd_modifiers |= Mod_Shift;
-                break;
-            case RAWKEY_Control_L:
-            case RAWKEY_Control_R:
-                kbd_modifiers |= Mod_Ctrl;
-                break;
-            case RAWKEY_Alt_L:
-            case RAWKEY_Alt_R:
-            case RAWKEY_Meta_L:
-            case RAWKEY_Meta_R:
-                kbd_modifiers |= Mod_Alt;
-                break;
-            }
-            event.flags = Is_Press;
-            break;
-        default:
-            dbg() << "unknown wscons event of type " << wsevent.type;
-        }
+        for (int i = 0; i < (int)(sizeof(kbd_trans_table) / sizeof(kbd_trans)); i++) {
+            // XXX: We are reading events from the wskbd mux which provides no
+            // indication of which child device this event came from.  Since
+            // each child has its own keyboard type and map, wsevent.value is
+            // only useful if you have the keyboard's specific map.
+            // I guess the proper way to do this is to open the mux, do
+            // WSMUXIO_LIST_DEVICES, then open each device separately and poll
+            // on it.  Then we'd know which device each event came from and can
+            // look it up properly, but that's a lot of work.  So just
+            // hard-code that we're looking at a USB device here...
+            if (wsevent.value != kbd_trans_table[i].wsusb_value)
+                continue;
 
-        for (long i = 0; i < (int)(sizeof(kbd_trans_table) / sizeof(kbd_trans)); i++) {
-            if (wsevent.value == kbd_trans_table[i].wskbd_value) {
-                if (kbd_modifiers & Mod_Shift) {
-                    event.key = kbd_trans_table[i].shifted_keycode;
-                    event.character = kbd_trans_table[i].shifted_character;
-                } else {
-                    event.key = kbd_trans_table[i].keycode;
-                    event.character = kbd_trans_table[i].character;
+            switch (wsevent.type) {
+            case WSCONS_EVENT_KEY_UP:
+                switch (kbd_trans_table[i].keycode) {
+                case Key_Shift:
+                    kbd_modifiers &= ~Mod_Shift;
+                    break;
+                case Key_Control:
+                    kbd_modifiers &= ~Mod_Ctrl;
+                    break;
+                case Key_Alt:
+                    kbd_modifiers &= ~Mod_Alt;
+                    break;
+                default:
+                    ;
+                }
+                break;
+            case WSCONS_EVENT_KEY_DOWN:
+                event.flags = Is_Press;
+
+                switch (kbd_trans_table[i].keycode) {
+                case Key_Shift:
+                    kbd_modifiers |= Mod_Shift;
+                    break;
+                case Key_Control:
+                    kbd_modifiers |= Mod_Ctrl;
+                    break;
+                case Key_Alt:
+                    kbd_modifiers |= Mod_Alt;
+                    break;
+                default:
+                    ;
                 }
                 break;
             }
+
+            if (kbd_modifiers & Mod_Shift) {
+                event.key = kbd_trans_table[i].shifted_keycode;
+                event.character = kbd_trans_table[i].shifted_character;
+            } else {
+                event.key = kbd_trans_table[i].keycode;
+                event.character = kbd_trans_table[i].character;
+            }
+            event.flags |= kbd_modifiers;
+            nread = sizeof(::KeyEvent);
+
+            //dbg() << "wskbd key " << wsevent.value << " (type " << wsevent.type << ") -> serenity event key " << event.key << " (" << (char)event.character << "), modifiers " << kbd_modifiers;
+            break;
         }
-
-        nread = sizeof(::KeyEvent);
-
-        // dbg() << "wskbd key " << wsevent.value << " (type " << wsevent.type << ") -> event key " << event.key << " (" << event.character << "), modifiers " << kbd_modifiers;
-
-        event.flags |= kbd_modifiers;
 #else
         ssize_t nread = read(m_keyboard_fd, (u8*)&event, sizeof(::KeyEvent));
 #endif
