@@ -124,17 +124,17 @@ void dump_tree(const LayoutNode& layout_node)
         auto& block = static_cast<const LayoutBlock&>(layout_node);
         for (size_t i = 0; i < indent; ++i)
             dbgprintf("    ");
-        dbgprintf("  Line boxes (%d):\n", block.line_boxes().size());
+        dbgprintf("  Line boxes (%zu):\n", block.line_boxes().size());
         for (size_t line_box_index = 0; line_box_index < block.line_boxes().size(); ++line_box_index) {
             auto& line_box = block.line_boxes()[line_box_index];
             for (size_t i = 0; i < indent; ++i)
                 dbgprintf("    ");
-            dbgprintf("    [%d] width: %g\n", line_box_index, line_box.width());
+            dbgprintf("    [%zu] width: %g\n", line_box_index, line_box.width());
             for (size_t fragment_index = 0; fragment_index < line_box.fragments().size(); ++fragment_index) {
                 auto& fragment = line_box.fragments()[fragment_index];
                 for (size_t i = 0; i < indent; ++i)
                     dbgprintf("    ");
-                dbgprintf("      [%d] layout_node: %s{%p}, start: %d, length: %d, rect: %s\n",
+                dbgprintf("      [%zu] layout_node: %s{%p}, start: %d, length: %d, rect: %s\n",
                     fragment_index,
                     fragment.layout_node().class_name(),
                     &fragment.layout_node(),
@@ -246,7 +246,7 @@ void dump_rule(const StyleRule& rule)
 
 void dump_sheet(const StyleSheet& sheet)
 {
-    dbgprintf("StyleSheet{%p}: %d rule(s)\n", &sheet, sheet.rules().size());
+    dbgprintf("StyleSheet{%p}: %zu rule(s)\n", &sheet, sheet.rules().size());
 
     for (auto& rule : sheet.rules()) {
         dump_rule(rule);
