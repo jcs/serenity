@@ -30,6 +30,16 @@
 #include <errno.h>
 #include <serenity.h>
 
+#ifdef __OpenBSD__
+#include <AK/Assertions.h>
+#include <err.h>
+#include <limits.h>
+#include <sys/shm.h>
+#include <sys/mman.h>
+
+#define EMAXERRNO ELAST
+#endif
+
 extern "C" {
 
 #ifdef __serenity__
@@ -117,6 +127,99 @@ int set_process_boost(int tid, int amount)
     (void)amount;
     return 0;
 }
+
+int shbuf_create(int size, void** buffer)
+{
+    int key, id = -1;
+
+    for (key = 1; key < INT_MAX; key++) {
+        id = shmget(key, size, IPC_CREAT | IPC_EXCL | 0600);
+        if (id != -1) {
+            *buffer = shmat(id, 0, 0);
+            if (*buffer == (void *)-1) {
+                perror("shmat");
+                ASSERT_NOT_REACHED();
+            }
+            warnx("%d: shbuf_create = shm key %d, id %d", getpid(), key, id);
+            break;
+        }
+    }
+
+    if (id == -1) {
+        perror("shmget: exhausted");
+        ASSERT_NOT_REACHED();
+    }
+
+    return key;
+}
+
+int shbuf_allow_pid(int shbuf_id, pid_t peer_pid)
+{
+    // XXX: non-serenity doesn't support this, but processes expect to be able
+    // to read once this is called
+    warnx("%d: %s(%d, %d) not implemented, allowing all", getpid(), __func__,
+        shbuf_id, peer_pid);
+    shbuf_allow_all(shbuf_id);
+    return 0;
+}
+
+int shbuf_allow_all(int shbuf_id)
+{
+    struct shmid_ds ds;
+    int id = shmget(shbuf_id, 0, 0);
+    if (id == -1)
+        return -1;
+    if (shmctl(id, IPC_STAT, &ds) == -1)
+        return -1;
+    ds.shm_perm.mode = 0666;
+    return shmctl(id, IPC_SET, &ds);
+}
+
+void* shbuf_get(int shbuf_id, __attribute__((unused)) size_t *size)
+{
+    int id = shmget(shbuf_id, 0, 0);
+    if (id == -1) {
+        warn("%d: shbuf_get(%d) failed", getpid(), shbuf_id);
+        errno = -id;
+        return (void*)-1;
+    }
+    void *j = shmat(id, 0, 0);
+    if (j == (void *)-1)
+        warn("%d: shmget(%d) = %d, but shmat failed", getpid(), shbuf_id, id);
+    return j;
+}
+
+int shbuf_release(int shbuf_id)
+{
+    int id = shmget(shbuf_id, 0, 0);
+    if (id == -1)
+        return -1;
+    return shmctl(id, IPC_RMID, NULL);
+}
+
+int shbuf_get_size(int shbuf_id)
+{
+    struct shmid_ds ds;
+    int id = shmget(shbuf_id, 0, 0);
+    if (id == -1)
+        return -1;
+    if (shmctl(id, IPC_STAT, &ds) == -1)
+        return 0;
+    return ds.shm_segsz;
+}
+
+int shbuf_seal(int shbuf_id)
+{
+    struct shmid_ds ds;
+    int id = shmget(shbuf_id, 0, 0);
+    if (id == -1)
+        return -1;
+    if (shmctl(id, IPC_STAT, &ds) == -1)
+        return -1;
+    ds.shm_perm.mode &= 0755; // remove group/world write
+    return shmctl(id, IPC_SET, &ds);
+}
+
 
 #endif
 
