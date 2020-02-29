@@ -207,7 +207,11 @@ int main(int argc, char** argv)
 
     args_parser.parse(argc, argv);
 
-    int ptm_fd = posix_openpt(O_RDWR | O_CLOEXEC);
+    int ptm_fd = posix_openpt(O_RDWR
+#ifdef __serenity__
+        | O_CLOEXEC
+#endif
+        );
     if (ptm_fd < 0) {
         perror("posix_openpt");
         return 1;
