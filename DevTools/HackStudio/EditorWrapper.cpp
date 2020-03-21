@@ -69,7 +69,7 @@ EditorWrapper::EditorWrapper()
         g_current_editor_wrapper = this;
     };
 
-    m_editor->on_open = [this](String path) {
+    m_editor->on_open = [](String path) {
         g_open_file(path);
     };
 }
