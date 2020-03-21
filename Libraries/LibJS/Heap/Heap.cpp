@@ -110,6 +110,7 @@ void Heap::gather_roots(HashTable<Cell*>& roots)
 
 void Heap::gather_conservative_roots(HashTable<Cell*>& roots)
 {
+#ifdef __serenity__
     FlatPtr dummy;
 
 #ifdef HEAP_DEBUG
@@ -174,6 +175,9 @@ void Heap::gather_conservative_roots(HashTable<Cell*>& roots)
             }
         }
     }
+#else
+    (void)roots;
+#endif
 }
 
 Cell* Heap::cell_from_possible_pointer(FlatPtr pointer)
