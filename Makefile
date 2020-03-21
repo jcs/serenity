@@ -15,7 +15,7 @@ SUBDIRS += \
 	Games \
 	Demos
 
-ifneq (, $(shell which ccache))
+ifneq (, $(shell which ccache 2>/dev/null))
   export PRE_CXX=ccache
 endif
 
