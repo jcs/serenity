@@ -40,29 +40,31 @@ NonnullRefPtr<ConfigFile> ConfigFile::get_for_app(const String& app_name)
     if (home_path == "/")
         home_path = String::format("/tmp");
     auto path = String::format("%s/%s.ini", home_path.characters(), app_name.characters());
-    return adopt(*new ConfigFile(path));
+    return adopt(*new ConfigFile(path, false));
 }
 
 NonnullRefPtr<ConfigFile> ConfigFile::get_for_system(const String& app_name)
 {
     auto path = String::format("/etc/%s.ini", app_name.characters());
-    return adopt(*new ConfigFile(path));
+    return adopt(*new ConfigFile(path, true));
 }
 
 NonnullRefPtr<ConfigFile> ConfigFile::open(const String& path)
 {
-    return adopt(*new ConfigFile(path));
+    return adopt(*new ConfigFile(path, false));
 }
 
-ConfigFile::ConfigFile(const String& file_name)
+ConfigFile::ConfigFile(const String& file_name, bool read_only)
     : m_file_name(file_name)
+    , m_read_only(read_only)
 {
     reparse();
 }
 
 ConfigFile::~ConfigFile()
 {
-    sync();
+    if (!m_read_only)
+        sync();
 }
 
 void ConfigFile::reparse()
@@ -166,6 +168,8 @@ bool ConfigFile::sync()
 {
     if (!m_dirty)
         return true;
+
+    ASSERT(!m_read_only);
 
     FILE* fp = fopen(m_file_name.characters(), "wb");
     if (!fp)

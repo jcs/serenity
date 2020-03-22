@@ -69,13 +69,14 @@ public:
     String file_name() const { return m_file_name; }
 
 private:
-    explicit ConfigFile(const String& file_name);
+    explicit ConfigFile(const String& file_name, bool read_only);
 
     void reparse();
 
     String m_file_name;
     HashMap<String, HashMap<String, String>> m_groups;
     bool m_dirty { false };
+    bool m_read_only { false };
 };
 
 }
