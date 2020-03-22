@@ -35,6 +35,7 @@
 #include <libgen.h>
 #include <pwd.h>
 #include <sched.h>
+#include <signal.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -48,6 +49,12 @@ struct UidAndGids {
 
 static HashMap<String, UidAndGids>* s_user_map;
 static HashMap<pid_t, Service*> s_service_map;
+
+void Service::for_each(Function<void(Service&)> callback)
+{
+    for (auto& s : s_service_map)
+        callback(*s.value);
+}
 
 void Service::resolve_user()
 {
@@ -203,6 +210,10 @@ void Service::spawn()
         ASSERT_NOT_REACHED();
     } else if (m_pid == 0) {
         // We are the child.
+        sigset_t mask;
+
+        sigemptyset(&mask);
+        sigprocmask(SIG_SETMASK, &mask, NULL);
 
         if (setsid() == -1) {
             perror("setsid");
@@ -296,6 +307,12 @@ void Service::spawn()
     }
 }
 
+void Service::kill(int signal)
+{
+    m_dying = true;
+    ::kill(m_pid, signal);
+}
+
 void Service::did_exit(int exit_code)
 {
     ASSERT(m_pid > 0);
@@ -305,7 +322,7 @@ void Service::did_exit(int exit_code)
     s_service_map.remove(m_pid);
     m_pid = -1;
 
-    if (!m_keep_alive)
+    if (!m_keep_alive || m_dying)
         return;
 
     int run_time_in_msec = m_run_timer.elapsed();

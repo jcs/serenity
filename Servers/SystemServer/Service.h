@@ -38,8 +38,10 @@ class Service final : public Core::Object {
 public:
     void activate();
     void did_exit(int exit_code);
+    void kill(int signal);
 
     static Service* find_by_pid(pid_t);
+    static void for_each(Function<void(Service&)>);
 
     void save_to(AK::JsonObject&) override;
 
@@ -57,6 +59,8 @@ private:
     int m_priority { 1 };
     // Whether we should re-launch it if it exits.
     bool m_keep_alive { false };
+    // Whether we're in the shutdown path.
+    bool m_dying { false };
     // Path to the socket to create and listen on on behalf of this service.
     String m_socket_path;
     // File system permissions for the socket.

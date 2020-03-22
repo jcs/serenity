@@ -62,6 +62,17 @@ static void sigchld_handler(int)
     Core::EventLoop::wake();
 }
 
+static void shutdown(int signal)
+{
+    dbg() << "Got signal " << signal << ", shutting down";
+
+    Service::for_each([signal](Service& service) {
+        service.kill(signal);
+    });
+
+    Core::EventLoop::main().quit(1);
+}
+
 static void check_for_test_mode()
 {
 #ifndef __serenity__
@@ -143,6 +154,13 @@ int main(int, char**)
         .sa_flags = SA_RESTART
     };
     sigaction(SIGCHLD, &sa, nullptr);
+
+    struct sigaction sdkill = {
+        .sa_handler = shutdown,
+        .sa_mask = 0,
+        .sa_flags = SA_RESTART
+    };
+    sigaction(SIGTERM, &sdkill, nullptr);
 
     Core::EventLoop event_loop;
 
