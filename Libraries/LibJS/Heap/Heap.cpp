@@ -36,7 +36,7 @@
 
 #ifdef __serenity__
 #    include <serenity.h>
-#elif __linux__
+#else
 #    include <pthread.h>
 #endif
 
